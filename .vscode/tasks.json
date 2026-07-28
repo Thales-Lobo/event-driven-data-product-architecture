@@ -1,0 +1,212 @@
+{
+  "version": "2.0.0",
+  "options": {
+    "cwd": "${workspaceFolder}"
+  },
+  "tasks": [
+    {
+      "label": "Start & Observe Full Stack",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "1. Start Full Stack",
+        "2. Open All Observability Terminals"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "1. Start Full Stack",
+      "type": "shell",
+      "command": "bash",
+      "args": ["scripts/start_stack.sh"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "0-setup",
+        "clear": true,
+        "focus": false,
+        "close": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "2. Open All Observability Terminals",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "API Logs",
+        "Orchestrator Logs",
+        "Kafka - base_data.updated",
+        "Kafka - data_product.recalculated",
+        "Postgres - base_data",
+        "Postgres - data_product"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "API Logs",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "logs", "-f", "api"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "1-app-logs",
+        "clear": true,
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Orchestrator Logs",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "logs", "-f", "orchestrator"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "1-app-logs",
+        "clear": true,
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Kafka - base_data.updated",
+      "type": "shell",
+      "command": "bash",
+      "args": ["scripts/watch_kafka_topic.sh", "base_data.updated"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "2-kafka-topics",
+        "clear": true,
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Kafka - data_product.recalculated",
+      "type": "shell",
+      "command": "bash",
+      "args": ["scripts/watch_kafka_topic.sh", "data_product.recalculated"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "2-kafka-topics",
+        "clear": true,
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Postgres - base_data",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "scripts/watch_table.sh",
+        "SELECT base_data_id, version, value, reference_period, created_at FROM base_data ORDER BY created_at DESC LIMIT 15;",
+        "15"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "3-postgres-tables",
+        "clear": true,
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Postgres - data_product",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "scripts/watch_table.sh",
+        "SELECT product_id, version, value, created_at FROM data_product ORDER BY created_at DESC LIMIT 15;",
+        "15"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "3-postgres-tables",
+        "clear": true,
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Demo Script (trigger_demo.py)",
+      "type": "shell",
+      "command": "uv",
+      "args": ["run", "python", "scripts/trigger_demo.py"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "4-actions",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Health Check",
+      "type": "shell",
+      "command": "curl",
+      "args": ["-s", "-i", "http://localhost:8000/health"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "4-actions",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Rebuild (no cache)",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "build", "--no-cache", "api", "orchestrator"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "4-actions",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop Stack",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "stop"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "4-actions",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop and Wipe Volumes (reset Postgres data)",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "down", "-v"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "4-actions",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

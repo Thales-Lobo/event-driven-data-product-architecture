@@ -1,0 +1,101 @@
+# ==============================================================================
+# Python
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+wheels/
+pip-wheel-metadata/
+
+# Virtual environments (uv, venv, virtualenv, pipenv, poetry — cover them all)
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checkers / linters (match [tool.mypy] / [tool.ruff] in pyproject.toml)
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.pytype/
+
+# Jupyter (in case notebooks are used for exploratory data analysis)
+.ipynb_checkpoints/
+
+# ==============================================================================
+# uv
+# ==============================================================================
+# uv.lock IS intentionally tracked (committed) for reproducible builds —
+# do NOT add it here. Only ignore uv's local cache directory.
+.uv-cache/
+
+# ==============================================================================
+# Environment & secrets
+# ==============================================================================
+# Real environment files may contain credentials/endpoints — never commit them.
+# The .env.example template (checked in) documents the required keys instead.
+.env
+.env.*
+!.env.example
+
+# ==============================================================================
+# Docker
+# ==============================================================================
+# Local bind-mount scratch data some setups create outside the named volume.
+docker-data/
+pgdata/
+
+# ==============================================================================
+# Editors / IDEs
+# ==============================================================================
+# .vscode/ is intentionally NOT fully ignored: tasks.json, extensions.json,
+# and settings.json are checked in on purpose to give every contributor the
+# same one-key (Ctrl+Shift+B) observability workflow out of the box. Only
+# ignore the genuinely personal/machine-specific files below.
+.vscode/*.log
+.vscode/ipch/
+.history/
+
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# ==============================================================================
+# OS cruft
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ==============================================================================
+# Logs & local scratch
+# ==============================================================================
+*.log
+logs/
+tmp/
+*.tmp

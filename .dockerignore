@@ -1,0 +1,55 @@
+# Keeps the Docker build context small and prevents dev-only or sensitive
+# files from ever being copyable into an image layer.
+#
+# NOTE: README.md and pyproject.toml are intentionally NOT excluded here —
+# the Dockerfile explicitly `COPY`s both (hatchling's build backend reads
+# pyproject.toml's `readme` field and expects the file to be present).
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Editors / IDE
+.vscode
+.idea
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# uv local cache (dependencies are re-resolved/installed fresh inside the image)
+.uv-cache/
+
+# Environment & secrets — never bake these into an image layer
+.env
+.env.*
+
+# Repo metadata not needed at runtime
+LICENSE
+CHANGELOG.md
+
+# Compose/Docker files themselves — irrelevant inside the image being built
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Local-only scratch data
+*.db
+*.sqlite3
+logs/
+tmp/

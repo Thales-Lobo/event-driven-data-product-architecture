@@ -1,0 +1,14 @@
+{
+  // Recommended extensions for working on this project. VS Code will prompt
+  // to install these when the folder is opened (Extensions view → Recommended).
+  "recommendations": [
+    "ms-python.python", // Python language support, run/debug
+    "ms-python.vscode-pylance", // fast type-checking + IntelliSense
+    "charliermarsh.ruff", // matches [tool.ruff] in pyproject.toml
+    "ms-azuretools.vscode-docker", // Dockerfile/compose editing, container explorer
+    "mtxr.sqltools", // browse Postgres tables from within VS Code
+    "mtxr.sqltools-driver-pg", // Postgres driver for SQLTools
+    "redhat.vscode-yaml", // docker-compose.yml schema validation
+    "tamasfe.even-better-toml" // pyproject.toml editing
+  ]
+}
