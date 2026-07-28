@@ -25,6 +25,9 @@ from datamesh.domain.events import BaseDataUpdatedEvent
 from datamesh.infrastructure.database import async_session_factory, init_db
 from datamesh.infrastructure.kafka_producer import EventProducer
 
+# Short HH:MM:SS timestamp, no redundant "[orchestrator]" tag -- the
+# dedicated VS Code terminal running this container is already labeled,
+# so repeating it on every line was just noise.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)-5s %(message)s",

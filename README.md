@@ -1,6 +1,6 @@
 <div align="center">
 
-# Event-Driven Data Product Platform
+# 🌐 Event-Driven Data Product Platform
 
 **A reference implementation of a decentralized, Data Mesh–inspired architecture
 with active metadata and a reactive event-driven control plane.**
@@ -17,28 +17,28 @@ with active metadata and a reactive event-driven control plane.**
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Core Concepts](#core-concepts)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [One-Key Observability Workflow (VS Code)](#one-key-observability-workflow-vs-code)
-- [API Reference](#api-reference)
-- [Walkthrough: The GDP Case Study](#walkthrough-the-gdp-case-study)
-- [Simulating New Data Arriving](#simulating-new-data-arriving)
-- [Manual Observability (without VS Code)](#manual-observability-without-vs-code)
-- [Environment Variables](#environment-variables)
-- [Development](#development)
-- [Troubleshooting](#troubleshooting)
-- [Academic Context](#academic-context)
-- [License](#license)
+- [🚀 Overview](#-overview)
+- [🧱 Architecture](#-architecture)
+- [🧩 Core Concepts](#-core-concepts)
+- [📂 Project Structure](#-project-structure)
+- [📋 Prerequisites](#-prerequisites)
+- [⚡ Getting Started](#-getting-started)
+- [🔭 One-Key Observability Workflow (VS Code)](#-one-key-observability-workflow-vs-code)
+- [📡 API Reference](#-api-reference)
+- [📊 Walkthrough: The GDP Case Study](#-walkthrough-the-gdp-case-study)
+- [🔄 Simulating New Data Arriving](#-simulating-new-data-arriving)
+- [🔍 Manual Observability (without VS Code)](#-manual-observability-without-vs-code)
+- [🔧 Environment Variables](#-environment-variables)
+- [💻 Development](#-development)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [🎓 Academic Context](#-academic-context)
+- [📄 License](#-license)
 
 ---
 
-## Overview
+## 🚀 Overview
 
 This project implements the platform architecture proposed in the dissertation
 *"Event-Driven Data Product Architecture: Active Metadata and Federated
@@ -58,7 +58,7 @@ every Data Product carries a `composition_lineage`: the exact upstream
 versions and timestamps it was computed from — the structural foundation for
 auditability and traceability described in the dissertation.
 
-## Architecture
+## 🧱 Architecture
 
 ```mermaid
 flowchart LR
@@ -99,16 +99,16 @@ flowchart LR
     Recalc -- publishes event --> T2
 ```
 
-**Container segregation is deliberate.** The `api` container only *produces*
-Kafka events; the `orchestrator` container only *consumes* them. They share
-the same Docker image but run as fully independent processes — if one goes
-down, the other keeps working, with Postgres and Kafka as the only points of
-contact between them. See [Troubleshooting](#troubleshooting) and the
-in-repo docstrings for the reasoning behind every resilience choice
-(`enable_auto_commit=False`, idempotent Kafka producer, partition keying by
-entity id, etc.).
+> **Container segregation is deliberate.** The `api` container only
+> *produces* Kafka events; the `orchestrator` container only *consumes* them.
+> They share the same Docker image but run as fully independent processes —
+> if one goes down, the other keeps working, with Postgres and Kafka as the
+> only points of contact between them. See [🐛 Troubleshooting](#-troubleshooting)
+> and the in-repo docstrings for the reasoning behind every resilience choice
+> (`enable_auto_commit=False`, idempotent Kafka producer, partition keying by
+> entity id, etc.).
 
-## Core Concepts
+## 🧩 Core Concepts
 
 | Concept | What it means here |
 |---|---|
@@ -119,40 +119,44 @@ entity id, etc.).
 | **Composition Lineage** | The exact upstream `base_data_id` + `version` + `timestamp_used` a Data Product version was computed from — the audit trail. |
 | **Control Plane** | The orchestrator: it reacts to `base_data.updated` events and recomputes every dependent Data Product automatically. |
 
-## Project Structure
+## 📂 Project Structure
 
-```
+```text
 event-driven-data-product-architecture/
 ├── docker-compose.yml          # postgres, kafka, api, orchestrator
 ├── Dockerfile                  # single image, two entrypoints
 ├── pyproject.toml / uv.lock    # dependency management (uv)
 ├── .env.example                # documents env vars for host-side runs
 ├── data/                       # mock heterogeneous sources (CSV, TXT)
+│   ├── industrial_production.csv
+│   └── services_revenue.txt
 ├── scripts/
 │   ├── trigger_demo.py         # end-to-end demo driver (via HTTP)
 │   ├── start_stack.sh          # build + up + wait-until-healthy
 │   ├── wait_for_stack.sh       # polls /health with timeout
-│   ├── watch_table.sh          # live-loop a Postgres query
-│   └── watch_kafka_topic.sh    # stream raw Kafka topic traffic
+│   ├── watch_table.sh          # live-loop a Postgres query (boxed table)
+│   ├── watch_kafka_topic.sh    # stream Kafka topic traffic
+│   └── format_kafka_line.py    # pretty-prints raw Kafka console output
 ├── .vscode/
 │   ├── tasks.json              # Ctrl+Shift+B observability workflow
 │   └── extensions.json         # recommended extensions
 └── src/datamesh/
     ├── domain/                 # metadata, events, ingestion contracts (pure)
     ├── infrastructure/         # SQLModel tables, DB engine, Kafka producer
-    ├── application/            # use cases: ingest, recalculate, business rules
+    ├── application/             # use cases: ingest, recalculate, business rules
     ├── adapters/sources/       # CSV / TXT / API connectors + registry
+    ├── logging_config.json     # uvicorn log formatting (short timestamps)
     ├── api/                    # === api container === FastAPI app
     └── orchestrator/           # === orchestrator container === Kafka consumer
 ```
 
-## Prerequisites
+## 📋 Prerequisites
 
 - **Docker** + **Docker Compose v2** (`docker compose version`)
 - **[uv](https://docs.astral.sh/uv/)** — used to run host-side scripts (the demo driver) with the exact pinned dependencies from `uv.lock`
-- (Optional, for VS Code workflow) **VS Code** with the recommended extensions from `.vscode/extensions.json`
+- (Optional, for the VS Code workflow) **VS Code** with the recommended extensions from `.vscode/extensions.json`
 
-## Getting Started
+## ⚡ Getting Started
 
 ```bash
 # 1. Install host-side dependencies (used by scripts/trigger_demo.py)
@@ -172,35 +176,40 @@ uv run python scripts/trigger_demo.py
 If you use VS Code, steps 2–3 (plus six live observability terminals) are a
 single keystroke away — see the next section.
 
-## One-Key Observability Workflow (VS Code)
+## 🔭 One-Key Observability Workflow (VS Code)
 
 Press **`Ctrl+Shift+B`** (`Cmd+Shift+B` on macOS). This runs the default build
 task defined in `.vscode/tasks.json`, which:
 
 1. Builds and starts the full stack, blocking until `/health` responds (no
-   blind `sleep`s — it genuinely waits for readiness).
+   blind `sleep`s — it genuinely waits for readiness), then **closes its own
+   terminal automatically** once setup finishes.
 2. Opens **six long-running terminals**, grouped by what they let you observe:
 
 | Group | Terminals | What you're watching |
 |---|---|---|
-| **1 — Application Logs** | `📡 API Logs`, `⚙️ Orchestrator Logs` | Requests hitting the API; the orchestrator reacting to events |
-| **2 — Kafka Message Bus** | `📨 base_data.updated`, `📨 data_product.recalculated` | Raw event traffic, exactly as it travels on the wire |
-| **3 — Postgres Tables** | `🗄️ base_data`, `🗄️ data_product` | Live table state, refreshing every 15 seconds |
+| **1 — Application Logs** | `📡 API Logs`, `🔁 Orchestrator Logs` | Requests hitting the API; the orchestrator reacting to events |
+| **2 — Kafka Message Bus** | `📨 Kafka - base_data.updated`, `📨 Kafka - data_product.recalculated` | Event traffic, pretty-printed (key, timestamp, indented JSON) |
+| **3 — Postgres Tables** | `🐘 Postgres - base_data`, `🐘 Postgres - data_product` | Live table state, boxed and refreshed every 15 seconds |
 
 Terminals within the same group are placed in the same panel/column, so
 related views stay next to each other instead of scattering across the
 screen. Each terminal is `dedicated`, meaning re-running the build task
 reuses the same terminal instead of piling up new ones.
 
-Additional on-demand tasks (via **`Ctrl+Shift+P` → "Tasks: Run Task"`**):
+All application logs use short `HH:MM:SS` timestamps and drop noisy details
+(client IPs, redundant service tags) to stay easy to scan without losing any
+information.
 
-- `▶️ Run Demo Script (trigger_demo.py)`
+Additional on-demand tasks (via **`Ctrl+Shift+P` → "Tasks: Run Task"**):
+
+- `🎬 Run Demo Script (trigger_demo.py)`
 - `🩺 Health Check`
 - `🔨 Rebuild (no cache)`
 - `🛑 Stop Stack`
-- `🔥 Stop & Wipe Volumes (reset Postgres data)`
+- `🔥 Stop and Wipe Volumes (reset Postgres data)`
 
-## API Reference
+## 📡 API Reference
 
 | Method | Path | Description |
 |---|---|---|
@@ -213,7 +222,7 @@ Additional on-demand tasks (via **`Ctrl+Shift+P` → "Tasks: Run Task"`**):
 
 Available connectors out of the box: `csv_industrial`, `txt_services`, `api_industrial`.
 
-## Walkthrough: The GDP Case Study
+## 📊 Walkthrough: The GDP Case Study
 
 The formula (dissertation Eq. 4.1): `GDP = 0.4 × industrial_production + 0.6 × services_revenue`
 
@@ -250,7 +259,7 @@ curl http://localhost:8000/data-products/monthly_gdp/history
 Or simply run `uv run python scripts/trigger_demo.py`, which performs all of
 the above and prints a formatted summary.
 
-## Simulating New Data Arriving
+## 🔄 Simulating New Data Arriving
 
 **File-backed sources (`csv_industrial`, `txt_services`):** append a new row
 to the underlying file, then rebuild and re-ingest — the connectors always
@@ -270,7 +279,7 @@ parameters that build a throwaway connector instance per request — ask if
 you'd like that patch applied; it keeps the shared singleton connector
 untouched and only affects `api_industrial` calls.
 
-## Manual Observability (without VS Code)
+## 🔍 Manual Observability (without VS Code)
 
 Everything the VS Code tasks automate can be run by hand, in separate terminals:
 
@@ -279,16 +288,16 @@ Everything the VS Code tasks automate can be run by hand, in separate terminals:
 docker compose logs -f api
 docker compose logs -f orchestrator
 
-# Raw Kafka traffic
+# Readable Kafka event traffic (key, timestamp, indented JSON)
 bash scripts/watch_kafka_topic.sh base_data.updated
 bash scripts/watch_kafka_topic.sh data_product.recalculated
 
-# Live Postgres tables
+# Live Postgres tables, boxed and refreshed every 15s
 bash scripts/watch_table.sh "SELECT * FROM base_data ORDER BY created_at DESC;"
 bash scripts/watch_table.sh "SELECT * FROM data_product ORDER BY created_at DESC;"
 ```
 
-## Environment Variables
+## 🔧 Environment Variables
 
 Only relevant when running scripts **outside** Docker Compose (containers get
 these from the `environment:` block in `docker-compose.yml` instead). Copy
@@ -303,7 +312,7 @@ these from the `environment:` block in `docker-compose.yml` instead). Copy
 | `POSTGRES_DB` | `datamesh` | Postgres database name |
 | `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` (compose: `kafka:9092`) | Kafka broker address |
 
-## Development
+## 💻 Development
 
 ```bash
 uv sync --all-extras         # install dev dependencies (ruff, mypy)
@@ -311,7 +320,7 @@ uv run ruff check .          # lint
 uv run mypy src              # strict type checking (see [tool.mypy])
 ```
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
 **`500 Internal Server Error` on `/ingest/csv_industrial` — "CSV source is empty"**
 The `data/*.csv` / `data/*.txt` mock files are missing or empty inside the
@@ -335,6 +344,19 @@ polling `/health` (which itself depends on the Kafka producer connecting)
 before the observability terminals open. If it still happens, just retry the
 ingestion — messages aren't lost, only delayed.
 
+**Terminals still show the old log format / old task layout after an edit**
+Any change to `src/datamesh/**` (including `logging_config.json` or
+`orchestrator/main.py`) or to `docker-compose.yml` only takes effect after a
+rebuild — the running containers are still executing the old code. Close all
+open VS Code task terminals first (old ones may still be attached to
+containers that no longer exist), then:
+```bash
+docker compose down
+docker compose build --no-cache api orchestrator
+docker compose up -d
+```
+Press `Ctrl+Shift+B` again afterwards to relaunch the terminals fresh.
+
 **Containers keep restarting**
 ```bash
 docker compose ps
@@ -344,7 +366,7 @@ docker compose logs kafka
 Most often a stale `pgdata` volume from an earlier schema. Reset with
 `docker compose down -v` (⚠️ deletes all persisted data) and start again.
 
-## Academic Context
+## 🎓 Academic Context
 
 This platform is the reference implementation for my Master's dissertation,
 *"Event-Driven Data Product Architecture: Active Metadata and Federated
@@ -355,6 +377,6 @@ University of São Paulo (2026).
 **Advisor:** Prof.ª Dr.ª Kelly Rosa Braghetto
 **Program:** Computer Science, IME-USP
 
-## License
+## 📄 License
 
 See the [LICENSE](./LICENSE) file for details.

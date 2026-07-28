@@ -1,15 +1,34 @@
 {
+  // VS Code Tasks for the Event-Driven Data Product Platform.
+  //
+  // Press Ctrl+Shift+B (Cmd+Shift+B on macOS) to run the default build task:
+  // it starts the full Docker Compose stack, waits until it is actually
+  // ready, then opens six long-running "observability" terminals, clustered
+  // by what they let you see:
+  //
+  //   Group 1 - Application Logs   -> API container | Orchestrator container
+  //   Group 2 - Kafka Message Bus  -> base_data.updated | data_product.recalculated
+  //   Group 3 - Postgres Tables    -> base_data | data_product
+  //
+  // Terminals in the same group render as tabs/splits within the same panel
+  // column, so related views stay visually together instead of scattering.
+  //
+  // Everything else (running the demo script, stopping the stack, etc.) is
+  // available on-demand via "Tasks: Run Task" in the Command Palette.
   "version": "2.0.0",
   "options": {
     "cwd": "${workspaceFolder}"
   },
   "tasks": [
+    // ------------------------------------------------------------------
+    // DEFAULT BUILD TASK (Ctrl+Shift+B) - orchestrates the two steps below.
+    // ------------------------------------------------------------------
     {
-      "label": "Start & Observe Full Stack",
+      "label": "🚀 Start & Observe Full Stack",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "1. Start Full Stack",
-        "2. Open All Observability Terminals"
+        "🐳 1. Start Full Stack",
+        "👀 2. Open All Observability Terminals"
       ],
       "group": {
         "kind": "build",
@@ -17,8 +36,15 @@
       },
       "problemMatcher": []
     },
+
+    // ------------------------------------------------------------------
+    // Step 1: build + start containers, block until the API is healthy.
+    // "close": true makes this terminal disappear on its own once the
+    // script finishes -- no "press any key" prompt. If setup fails, check
+    // the log terminals that open right after, or re-run this task alone.
+    // ------------------------------------------------------------------
     {
-      "label": "1. Start Full Stack",
+      "label": "🐳 1. Start Full Stack",
       "type": "shell",
       "command": "bash",
       "args": ["scripts/start_stack.sh"],
@@ -32,21 +58,30 @@
       },
       "problemMatcher": []
     },
+
+    // ------------------------------------------------------------------
+    // Step 2: meta-task fanning out into the six watcher tasks below,
+    // all launched in parallel once Step 1 has finished.
+    // ------------------------------------------------------------------
     {
-      "label": "2. Open All Observability Terminals",
+      "label": "👀 2. Open All Observability Terminals",
       "dependsOrder": "parallel",
       "dependsOn": [
-        "API Logs",
-        "Orchestrator Logs",
-        "Kafka - base_data.updated",
-        "Kafka - data_product.recalculated",
-        "Postgres - base_data",
-        "Postgres - data_product"
+        "📡 API Logs",
+        "🔁 Orchestrator Logs",
+        "📨 Kafka - base_data.updated",
+        "📨 Kafka - data_product.recalculated",
+        "🐘 Postgres - base_data",
+        "🐘 Postgres - data_product"
       ],
       "problemMatcher": []
     },
+
+    // ------------------------------------------------------------------
+    // Group 1 - Application Logs (API + Orchestrator)
+    // ------------------------------------------------------------------
     {
-      "label": "API Logs",
+      "label": "📡 API Logs",
       "type": "shell",
       "command": "docker",
       "args": ["compose", "logs", "-f", "api"],
@@ -61,7 +96,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Orchestrator Logs",
+      "label": "🔁 Orchestrator Logs",
       "type": "shell",
       "command": "docker",
       "args": ["compose", "logs", "-f", "orchestrator"],
@@ -75,8 +110,12 @@
       },
       "problemMatcher": []
     },
+
+    // ------------------------------------------------------------------
+    // Group 2 - Kafka Message Bus (readable event traffic on both topics)
+    // ------------------------------------------------------------------
     {
-      "label": "Kafka - base_data.updated",
+      "label": "📨 Kafka - base_data.updated",
       "type": "shell",
       "command": "bash",
       "args": ["scripts/watch_kafka_topic.sh", "base_data.updated"],
@@ -91,7 +130,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Kafka - data_product.recalculated",
+      "label": "📨 Kafka - data_product.recalculated",
       "type": "shell",
       "command": "bash",
       "args": ["scripts/watch_kafka_topic.sh", "data_product.recalculated"],
@@ -105,8 +144,12 @@
       },
       "problemMatcher": []
     },
+
+    // ------------------------------------------------------------------
+    // Group 3 - Postgres Tables (live state, refreshed every 15 seconds)
+    // ------------------------------------------------------------------
     {
-      "label": "Postgres - base_data",
+      "label": "🐘 Postgres - base_data",
       "type": "shell",
       "command": "bash",
       "args": [
@@ -125,7 +168,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Postgres - data_product",
+      "label": "🐘 Postgres - data_product",
       "type": "shell",
       "command": "bash",
       "args": [
@@ -143,8 +186,13 @@
       },
       "problemMatcher": []
     },
+
+    // ------------------------------------------------------------------
+    // On-demand utility tasks (via "Tasks: Run Task" in the Command
+    // Palette). Not part of the default Ctrl+Shift+B build.
+    // ------------------------------------------------------------------
     {
-      "label": "Run Demo Script (trigger_demo.py)",
+      "label": "🎬 Run Demo Script (trigger_demo.py)",
       "type": "shell",
       "command": "uv",
       "args": ["run", "python", "scripts/trigger_demo.py"],
@@ -157,7 +205,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Health Check",
+      "label": "🩺 Health Check",
       "type": "shell",
       "command": "curl",
       "args": ["-s", "-i", "http://localhost:8000/health"],
@@ -170,7 +218,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Rebuild (no cache)",
+      "label": "🔨 Rebuild (no cache)",
       "type": "shell",
       "command": "docker",
       "args": ["compose", "build", "--no-cache", "api", "orchestrator"],
@@ -183,7 +231,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Stop Stack",
+      "label": "🛑 Stop Stack",
       "type": "shell",
       "command": "docker",
       "args": ["compose", "stop"],
@@ -196,7 +244,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Stop and Wipe Volumes (reset Postgres data)",
+      "label": "🔥 Stop and Wipe Volumes (reset Postgres data)",
       "type": "shell",
       "command": "docker",
       "args": ["compose", "down", "-v"],
